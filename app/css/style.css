@@ -1,0 +1,46 @@
+a{
+	color: #ccd500;
+	text-decoration: none;
+}
+a:hover{
+	text-decoration: underline;
+	color: #a9b119;
+}
+.clear {
+    clear: both;
+}
+html {
+    /*position: relative;*/
+    height: 100%;
+}
+body {
+    /*background: -webkit-linear-gradient(top, rgb(203, 235, 219) 0%, rgb(55, 148, 192) 120%);*/
+        background: -moz-linear-gradient(top, rgb(203, 235, 219) 0%, rgb(55, 148, 192) 120%);
+        font-family: '微软雅黑', sans-serif;
+        font-size: 16px;
+        position: relative;
+        top: 0px;
+        left: 0px;
+        bottom: 0px;
+        right: 0px;
+}
+b{
+	font-weight: 600;
+}
+
+span {
+    font-size: 20px;
+}
+
+.panel-heading {
+    text-align: center;
+}
+
+.panel-body {
+    text-align: center;
+}
+
+.ad_img {
+    width: 400px;
+    height: 200px;
+}
