@@ -1,12 +1,13 @@
 {
   "name": "eth-ad-grid",
   "version": "1.0.0",
-  "description": "",
+  "description": "以太坊广告格子",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
+	"dev": "lite-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

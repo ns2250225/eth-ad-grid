@@ -31,6 +31,8 @@ function getAdList() {
   $.get(backendURL, function(result){
     console.log(result)
 
+    $("#ad_nums").html(result.length)
+
     $("#ad_list").children().remove()
 
     for (item of result) {
@@ -86,15 +88,15 @@ function init() {
   }
 
   // init contracts
-  $.getJSON('BlogSystem.json', function(data) {
+  $.getJSON('AdGrid.json', function(data) {
       // Get the necessary contract artifact file and instantiate it with truffle-contract.
       var BlogSystemArtifact = data
 
       try {
-         contracts.BlogSystem = TruffleContract(BlogSystemArtifact)
+         contracts.AdGrid = TruffleContract(BlogSystemArtifact)
 
         // Set the provider for our contract.
-        contracts.BlogSystem.setProvider(web3Provider)
+        contracts.AdGrid.setProvider(web3Provider)
 
         checkAccount()
 
@@ -105,7 +107,7 @@ function init() {
 
   // event binding
   $(document).on('click', '#publish', publish)
-  $(document).on('click', '#whitdraw', whitdraw)
+  $(document).on('click', '#get_eth', get_eth)
 
   console.log("init end...")
 }
@@ -115,26 +117,12 @@ function checkAccount() {
   web3.eth.getAccounts(function(error, accounts) {
         account = accounts[0]
 
-        contracts.BlogSystem.deployed().then(function(_instance) {
+        contracts.AdGrid.deployed().then(function(_instance) {
             instance = _instance
 
-            // add event listen
-            var publish_event = instance.PublishArticle()
-            var read_event = instance.ReadArticle()
-            publish_event.watch(function(err, resp) {
-               if(resp.event === "PublishArticle") {
-                  
-                   var title = resp.args.title
-                   
-                   $(`<div class='row' id="mydiv" style='margin-left: 300px;'><h1 style='display: inline-block;'>${title}</h1 id="mydivheader"><button type='button' onclick='read("${title}")' class='btn btn-primary' style='display: inline-block; margin-left:100px;'>点赞</button></div>`).appendTo($("#ArticleList")).drag()
-
-                   console.log(title)
-
-                   alert('发布成功！')
-               }
-            });
-
+            checkReady()
             checkBalance()
+
         })
         .catch(function(err) {
             alert('Make sure you are connected to Ropsten network')
@@ -144,52 +132,49 @@ function checkAccount() {
 
 
 function checkBalance() {
-  instance.balanceOf.call(account).then(function(_balance) {
+  instance.contractBalance.call().then(function(_balance) {
         balance = _balance.valueOf()
         var balanceInEther = web3.fromWei(balance, "ether")
         $("#balance").html(balanceInEther + " ether")
   })
 }
 
-function whitdraw() {
+function checkReady() {
+  instance.isReady.call(account).then(function(_isReady) {
+      console.log("============>", _isReady)
+      if (_isReady) {
+        $("#get_eth").attr("disabled", false)
+      } else {
+        $("#get_eth").attr("disabled", true)
+      }
+  })
+}
+
+function get_eth() {
   checkBalance()
 
   if(balance != 0) {
-    instance.withdraw.sendTransaction({from: account, value: 0, gas: 3141592}).then(function(resp) {
+    instance.GetDailyETH.sendTransaction({from: account, value: 0, gas: 3141592}).then(function(resp) {
         console.log(resp)
-        alert("提现成功！")
+        alert("领取成功！")
+        checkReady()
         setTimeout(checkBalance, 2000)
     })
     .catch(function(err) {
         console.log(err)
     });
   } else {
-    alert('你没有能提现的奖励')
+    alert('没有足够的赞助费能领取~')
   }
 }
 
 
 function publish() {
-  var _title = $("#article-title").val()
 
-  // sned transaction to publish an article
-  instance.Publish.sendTransaction(_title, {from: account, value: web3.toWei('0.001', 'ether')}).then(function(resp) {
+  instance.Publish.sendTransaction({from: account, value: web3.toWei('0.1', 'ether')}).then(function(resp) {
     console.log(resp)
-    $("#cancel").click()
-    setTimeout(checkBalance, 2000)
-  })
-  .catch(function(err) {
-    console.log(err)
-  })
-}
-
-
-function read(title) {
-  console.log(title)
-  // sned transaction to read an article
-  instance.Read.sendTransaction(title, {from: account, value: web3.toWei('0.001', 'ether')}).then(function(resp) {
-    console.log(resp)
-    setTimeout(checkBalance, 2000)
+    $('#publishModal').modal('show')
+    setTimeout(checkBalance, 1000)
   })
   .catch(function(err) {
     console.log(err)
